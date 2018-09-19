@@ -2,11 +2,11 @@
 
 ## Table of Contents
 
-- [Workspace](#Create-Workspace)
-- [Publishers and Subscribers](#Publishers-and-Subscribers)
-- [Messages](#Messages)
-- [Services](#Services)
-- [Commands](#Commands)
+- [Workspace](#create-workspace)
+- [Publishers and Subscribers](#publishers-and-subscribers)
+- [Messages](#messages)
+- [Services](#services)
+- [Commands](#commands)
 
 ---
 
