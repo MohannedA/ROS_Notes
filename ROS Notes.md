@@ -7,7 +7,7 @@
 - [Publishers and Subscribers](#publishers-and-subscribers)
 - [Messages](#messages)
 - [Services](#services)
-- [Network Configuration](#network_configuration)
+- [Network Configuration](#network-configuration)
 - [Robots](#robots)
   * [Turtlesim](#turtlesim)
   * [Turtlebot](#turtlebot)
