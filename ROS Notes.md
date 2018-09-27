@@ -511,7 +511,7 @@ cd catkin_ws
 catkin_make
 ```
 
-7. Check if everything is fine 
+7. Check if everything is fine
 
 - It must contain `ros_service_assignment/RectangleAeraService`
 
@@ -647,8 +647,8 @@ https://edu.gaitech.hk/turtlebot/network-config-doc.html
 
 ### Turtlesim
 
-Refernces\
-[01] http://wiki.ros.org/turtlesim\
+Refernces </br>
+[01] http://wiki.ros.org/turtlesim </br>
 [02] http://wiki.ros.org/ROS/Tutorials/UnderstandingServicesParams
 
 #### Start Turtlesim
