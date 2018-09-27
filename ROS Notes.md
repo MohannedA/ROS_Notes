@@ -4,6 +4,7 @@
 
 - `roscore` should be run before anything. Read about [roscore](#roscore).
 
+
 ## Table of Contents
 
 - [Workspace](#workspace)
@@ -646,8 +647,8 @@ https://edu.gaitech.hk/turtlebot/network-config-doc.html
 
 ### Turtlesim
 
-Refernces
-[01] http://wiki.ros.org/turtlesim
+Refernces\
+[01] http://wiki.ros.org/turtlesim\
 [02] http://wiki.ros.org/ROS/Tutorials/UnderstandingServicesParams
 
 #### Start Turtlesim
