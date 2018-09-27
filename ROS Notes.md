@@ -18,6 +18,7 @@
   * [rosmsg](#rosmsg)
   * [rossrv](#rossrv)
   * [rosrun](#rosrun)
+  * [roslaunch](#roslaunch)
   * [roscd](#roscd)
 - [Others](#others)
 
@@ -27,7 +28,7 @@
 
 ### Configure Workspace
 
-1. Add the following command into .bashrc file to activate the ROS default workspace
+1. Add the following command into `.bashrc` file to activate the ROS default workspace
 
 ```sh
 source /opt/ros/kinetic/setup.bash
@@ -57,10 +58,10 @@ catkin_make
 
 ### Create Package
 
-1. Go to the "src" folder
+1. Go to the `src` folder
 
 ```sh
-cd ~catkin_ws/src/
+cd ~/catkin_ws/src/
 ```
 
 2. Create your package (specify the dependencies)
@@ -78,7 +79,7 @@ catkin_make
 
 ### Make The New Package The Default One
 
-Add the following command in .bashrc (in HOME directory)
+Add the following command in `.bashrc` (in HOME directory)
 
 ```sh
 source /home/riotu/catkin_ws/devel/setup.bash 
@@ -92,38 +93,164 @@ replace riotu by your username
 
 To understand ROS tobics [READ](understand-ros-topics.pdf)
 
+### Get Publisher and Subscribers of a Tobic
+
+```sh
+$ rostopic info /chatter
+Type: std_msgs/String
+
+Publishers: 
+ * /talker_30225_1538066475268 (http://ubuntu:36549/)
+
+Subscribers: 
+ * /listener_30271_1538066488910 (http://ubuntu:38827/)
+
+```
+
+You can get the available topics by typing
+
+```sh
+rostopic list
+```
+
+Read about [rostopic](#rostopic)
+
 ### Publisher
 
+<details>
+<summary>talker.py</summary>
 
+```python
+#!/usr/bin/env python
+# license removed for brevity
+import rospy
+from std_msgs.msg import String
 
+def talker():
+    #create a new publisher. we specify the topic name, then type of message then the queue size
+    pub = rospy.Publisher('chatter', String, queue_size=10)
+    #we need to initialize the node
+    # In ROS, nodes are uniquely named. If two nodes with the same
+    # node are launched, the previous one is kicked off. The
+    # anonymous=True flag means that rospy will choose a unique
+    # name for our 'talker' node 
+    rospy.init_node('talker', anonymous=True)
+    #set the loop rate
+    rate = rospy.Rate(1) # 1hz
+    #keep publishing until a Ctrl-C is pressed
+    i = 0
+    while not rospy.is_shutdown():
+        hello_str = "hello world %s" % i
+        rospy.loginfo(hello_str)
+        pub.publish(hello_str)
+        rate.sleep()
+        i=i+1
 
-### Subscriber 
+if __name__ == '__main__':
+    try:
+        talker()
+    except rospy.ROSInterruptException:
+        pass
+
+```
+
+</details>
+
+Run the publisher
+
+```sh
+$ rosrun ros_essentials_cpp talker.py
+[INFO] [1538046986.881161]: hello world 0
+[INFO] [1538046987.895407]: hello world 1
+[INFO] [1538046988.882495]: hello world 2
+[INFO] [1538046989.883143]: hello world 3
+[INFO] [1538046990.882535]: hello world 4
+...
+```
+
+Read about [rosrun](#rosrun)
+
+### Subscriber
+
+<details>
+<summary>listener.py</summary>
+
+```python
+#!/usr/bin/env python
+import rospy
+from std_msgs.msg import String
+
+def callback(message):
+    #get_caller_id(): Get fully resolved name of local node
+    rospy.loginfo(rospy.get_caller_id() + "I heard %s", message.data)
+    
+def listener():
+
+    # In ROS, nodes are uniquely named. If two nodes with the same
+    # node are launched, the previous one is kicked off. The
+    # anonymous=True flag means that rospy will choose a unique
+    # name for our 'listener' node so that multiple listeners can
+    # run simultaneously.
+    rospy.init_node('listener', anonymous=True)
+
+    rospy.Subscriber("chatter", String, callback)
+
+    # spin() simply keeps python from exiting until this node is stopped
+    rospy.spin()
+
+if __name__ == '__main__':
+    listener()
+
+```
+
+</details>
+
+Run the subscriber
+
+```sh
+$ rosrun ros_essentials_cpp listener.py
+[INFO] [1538047021.884116]: /listener_4579_1538047020918I heard hello world 35
+[INFO] [1538047022.883483]: /listener_4579_1538047020918I heard hello world 36
+[INFO] [1538047023.883734]: /listener_4579_1538047020918I heard hello world 37
+[INFO] [1538047024.883639]: /listener_4579_1538047020918I heard hello world 38
+...
+```
+
+Read about [rosrun](#rosrun)
 
 ---
+
 
 ## Messages
 
 - Syntax: package_name/message_type
 - Unsigned int only takes positive values.
 
----
+### Set up Message
 
-## Services
+1. Create `msg` folder in the package_name (e.g. ros_service_assignment).
 
-### Set up Client/Server
+2. Create `IoTSensor.msg` file in `msg` folder.
 
-1. Create "srv" folder in the package_name (e.g. ros_service_assignment).
+3. Add the request and response values in `IoTSensor.msg` file. Example:
 
-2. Add two dependencies in "package.xml"
+```plain
+int32 id
+string name
+float32 temperature
+float32 humidity
+```
+
+4. Add two dependencies in `package.xml`
 
 ```xml
 <build_depend>message_generation</build_depend>
 <exec_depend>message_runtime</exec_depend>
 ```
 
-3. Modify or add the following in "CMakeLists.txt"
+5. Modify or add the following in `CMakeLists.txt`
 
-- Add "message_generation"
+- Add `message_generation`
 
 ```plain
 ## Find catkin macros and libraries
@@ -137,14 +264,14 @@ find_package(catkin REQUIRED COMPONENTS
 )
 ```
 
-- Add "RectangleAeraService.srv" (.srv file)
+- Uncomment and add `IoTSensor.msg` (`.msg` file)
 
 ```plain
-## Generate services in the 'srv' folder
-add_service_files(
+## Generate messages in the 'msg' folder
+add_message_files(
    FILES
-   RectangleAeraService.srv
- )
+   IoTSensor.msg
+)
 ```
 
 - Uncomment the following
@@ -157,7 +284,7 @@ add_service_files(
  )
 ```
 
-- Add "message_runtime"
+- Uncomment and add `message_runtime`
 
 ```plain
 ###################################
@@ -178,15 +305,198 @@ catkin_package(
 
 ```
 
-4. Create ".srv" file in "srv" folder.
+6. Run in terminal
 
-5. Add the request and response values in ".srv" file. Example:
+```sh
+cd catkin_ws
+catkin_make
+```
+
+7. Check if everything is fine 
+
+- It must contain `ros_cs460_package/IoTSensor`
+
+```sh
+$ rosmsg list
+...
+ros_cs460_package/IoTSensor
+...
+```
+
+### Use Message
+
+<details>
+
+<summary>iot_sensor_publisher.py</summary>
+
+```python
+#!/usr/bin/env python
+# license removed for brevity
+import rospy
+from ros_cs460_package.msg import IoTSensor
+import random
+
+#create a new publisher. we specify the topic name, then type of message then the queue size
+pub = rospy.Publisher('iot_sensor_topic', IoTSensor, queue_size=10)
+
+#we need to initialize the node
+rospy.init_node('iot_sensor_publisher_node', anonymous=True)
+
+#set the loop rate
+rate = rospy.Rate(1) # 1hz
+#keep publishing until a Ctrl-C is pressed
+i = 0
+while not rospy.is_shutdown():
+    iot_sensor = IoTSensor()
+    iot_sensor.id = 1
+    iot_sensor.name="iot_parking_01"
+    iot_sensor.temperature = 24.33 + (random.random()*2)
+    iot_sensor.humidity = 33.41+ (random.random()*2)
+    rospy.loginfo("I publish:")
+    rospy.loginfo(iot_sensor)
+    pub.publish(iot_sensor)
+    rate.sleep()
+    i=i+1
+
+```
+
+</details>
+
+<details>
+<summary>iot_sensor_subscriber.py</summary>
+
+```python
+#!/usr/bin/env python
+import rospy
+from ros_cs460_package.msg import IoTSensor
+
+def iot_sensor_callback(iot_sensor_message):
+    rospy.loginfo("new IoT data received: (%d, %s, %.2f ,%.2f)", 
+        iot_sensor_message.id,iot_sensor_message.name,
+        iot_sensor_message.temperature,iot_sensor_message.humidity)
+    
+rospy.init_node('iot_sensor_subscriber_node', anonymous=True)
+
+rospy.Subscriber("iot_sensor_topic", IoTSensor, iot_sensor_callback)
+
+# spin() simply keeps python from exiting until this node is stopped
+rospy.spin()
+```
+
+</details>
+
+- Run the publisher
+
+```sh
+$ rosrun ros_cs460_package iot_sensor_publisher.py
+[INFO] [1538065355.755153]: I publish:
+[INFO] [1538065355.758797]: id: 1
+name: "iot_parking_01"
+temperature: 24.6894078555
+humidity: 34.139884549
+[INFO] [1538065356.756542]: I publish:
+[INFO] [1538065356.758693]: id: 1
+name: "iot_parking_01"
+temperature: 26.2780855119
+humidity: 33.8374695749
+...
+```
+
+- Run the subscriber
+
+```sh
+$ rosrun ros_cs460_package iot_sensor_subscriber.py
+[INFO] [1538065376.763998]: new IoT data received: (1, iot_parking_01, 25.33 ,35.15)
+[INFO] [1538065377.765967]: new IoT data received: (1, iot_parking_01, 25.77 ,34.45)
+...
+```
+
+Read about [rosrun](#rosrun)
+
+---
+
+## Services
+
+### Set up Client/Server
+
+1. Create `srv` folder in the package_name (e.g. ros_service_assignment).
+
+2. Create `RectangleAeraService.srv` file in `srv` folder.
+
+3. Add the request and response values in `RectangleAeraService.srv` file. Example:
 
 ```plain
 float32 width
 float32 height
 ---
 float32 area
+```
+
+- First part (before `---`) is the request part.
+- Second part (after `---`) is the response part.
+
+4. Add two dependencies in `package.xml`
+
+```xml
+<build_depend>message_generation</build_depend>
+<exec_depend>message_runtime</exec_depend>
+```
+
+5. Modify or add the following in `CMakeLists.txt`
+
+- Add `message_generation`
+
+```plain
+## Find catkin macros and libraries
+## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+## is used, also find other catkin packages
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  rospy
+  std_msgs
+  message_generation
+)
+```
+
+- Uncomment and add `RectangleAeraService.srv` (`.srv` file)
+
+```plain
+## Generate services in the 'srv' folder
+add_service_files(
+   FILES
+   RectangleAeraService.srv
+ )
+```
+
+- Uncomment the following
+
+```plain
+## Generate added messages and services with any dependencies listed here
+ generate_messages(
+   DEPENDENCIES
+   std_msgs
+ )
+```
+
+- Uncomment and add `message_runtime`
+
+```plain
+###################################
+## catkin specific configuration ##
+###################################
+## The catkin_package macro generates cmake config files for your package
+## Declare things to be passed to dependent projects
+## INCLUDE_DIRS: uncomment this if your package contains header files
+## LIBRARIES: libraries you create in this project that dependent projects also need
+## CATKIN_DEPENDS: catkin_packages dependent projects also need
+## DEPENDS: system dependencies of this project that dependent projects also need
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES ros_service_assignment
+  CATKIN_DEPENDS roscpp rospy std_msgs message_runtime
+  DEPENDS system_lib
+)
+
 ```
 
 6. Run in terminal
@@ -196,13 +506,18 @@ cd catkin_ws
 catkin_make
 ```
 
-7. Check if everything is fine
+7. Check if everything is fine 
+
+- It must contain `ros_service_assignment/RectangleAeraService`
 
 ```sh
-rossrv list
+$ rossrv list
+...
+ros_service_assignment/RectangleAeraService
+...
 ```
 
-Read More about [rossrv](#rossrv)
+Read about [rossrv](#rossrv)
 
 ### Use Client/Server
 
@@ -284,6 +599,8 @@ $ rosrun ros_service_assignment area_client.py 3 4
 Requesting 3*4
 3 * 4 = 12.0
 ```
+
+Read about [rosrun](#rosrun)
 
 ---
 
@@ -600,6 +917,23 @@ if __name__=='__main__':
 
 </details>
 
+`cleaner_py.launch` is used to run `turtlesim_node` and `cleaner.py` at the same time
+
+```xml
+<launch>
+    <node name="turtlesim_node" pkg="turtlesim" type="turtlesim_node" output="screen"/>
+    <node name="cleaner.py" pkg="ros_essentials_cpp" type="cleaner.py" output="screen"/>
+</launch>
+```
+
+Run `cleaner_py.launch` 
+
+```sh
+roslaunch ros_essentials_cpp cleaner_py.launch
+```
+
+Read about [roslaunch](#roslaunch)
+
 ---
 
 ## Commands
@@ -695,6 +1029,16 @@ Example:
 rosrun roscpp_tutorials talker.py
 ```
 
+### roslaunch 
+
+> roslaunch is a tool for easily launching multiple ROS nodes locally and remotely via SSH, as well as setting parameters on the Parameter Server. It includes options to automatically respawn processes that have already died. roslaunch takes in one or more XML configuration files (with the .launch extension) that specify the parameters to set and nodes to launch, as well as the machines that they should be run on.
+
+Usage: 
+
+```sh
+roslaunch package_name file.launch
+```
+
 ### roscd
 
 > roscd allows you to change directories using a package name, stack name, or special location.
@@ -719,15 +1063,38 @@ roscd
 
 ---
 
-## Others
+## Others 
+
+### Create `.launch` file 
+
+> `.launch` file is used to run many nodes at the same time. 
+
+#### Example:
+
+`cleaner_py.launch` is used to run `turtlesim_node` and `cleaner.py` at the same time
+
+```xml
+<launch>
+    <node name="turtlesim_node" pkg="turtlesim" type="turtlesim_node" output="screen"/>
+    <node name="cleaner.py" pkg="ros_essentials_cpp" type="cleaner.py" output="screen"/>
+</launch>
+```
+
+Run `cleaner_py.launch` 
+
+```sh
+roslaunch ros_essentials_cpp cleaner_py.launch
+```
+
+Read about [roslaunch](#roslaunch)
+
 
 ### Create shortcuts and aliases in .bashrc (in HOME directory)
 
-Add the following line to make "gb" shortcut to open "Gedit" to edit .bashrc
+Add the following line to make `gb` shortcut to open Gedit to edit `.bashrc`
 
 ```sh
 alias gb=“gedit /home/riotu/.bashrc” 
 ```
-
 
 ---
