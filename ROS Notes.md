@@ -1332,9 +1332,9 @@ alias gb=“gedit /home/riotu/.bashrc”
 
 ## Troubleshooting
 
-### `Failed to contact master` 
+### `Failed to contact master` Problem
 
-![Failed To Contact Master](failed_to_contact_master.png)
+![Failed to contact master](failed_to_contact_master.PNG)
 
 To solve this problem, try one of the following solutions
 
@@ -1344,7 +1344,7 @@ To solve this problem, try one of the following solutions
 roscore
 ```
 
--  Make sure [Network Configuration](#network-configuration) part is commented
+- Make sure [Network Configuration](#network-configuration) part is commented
 
 ```sh
 #The IP address for the Master node
@@ -1353,7 +1353,7 @@ roscore
 #export ROS_HOSTNAME=192.168.8.126
 ```
 
-### Method After The Publisher is NOT Functioning
+### Method After The Publisher is NOT Functioning Problem
 
 Add `time.sleep(<int>)` after publisher declaration
 
