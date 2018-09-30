@@ -1332,4 +1332,37 @@ alias gb=“gedit /home/riotu/.bashrc”
 
 ## Troubleshooting
 
+### `Failed to contact master` 
+
+![Failed To Contact Master](failed_to_contact_master.png)
+
+To solve this problem, try one of the following solutions
+
+- Run
+
+```sh
+roscore
+```
+
+-  Make sure [Network Configuration](#network-configuration) part is commented
+
+```sh
+#The IP address for the Master node
+#export ROS_MASTER_URI=http://192.168.8.111:11311
+#The IP address for your device/host IP address
+#export ROS_HOSTNAME=192.168.8.126
+```
+
+### Method After The Publisher is NOT Functioning
+
+Add `time.sleep(<int>)` after publisher declaration
+
+```python
+...
+velocity_publisher = rospy.Publisher(cmd_vel_topic, Twist, queue_size=10)
+time.sleep(2)
+move(22.0, 90.0, True)
+...
+```
+
 ---
