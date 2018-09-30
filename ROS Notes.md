@@ -26,6 +26,7 @@
   * [roslaunch](#roslaunch)
   * [roscd](#roscd)
 - [Others](#others)
+- [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -43,11 +44,11 @@ source /opt/ros/kinetic/setup.bash
 
 - Reference: http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment
 
-- catkin workspace will be used to create and store your own ROS packages (project).
+- `catkin` workspace will be used to create and store your own ROS packages (project).
 
-- catkin is the name of the build tool used to compile and execute programs in ROS.
+- `catkin` is the name of the build tool used to compile and execute programs in ROS.
 
-To create catkin workspace (catkin_ws) in HOME directory
+Create `catkin` workspace (catkin_ws) in `HOME` directory
 
 ```sh
 mkdir -p ~/catkin_ws/src
@@ -75,7 +76,7 @@ cd ~/catkin_ws/src/
 catkin_create_pkg cs460_package std_msgs rospy roscpp
 ```
 
-3. Go to catkin_ws and compile to generate executable and configuration files for the project
+3. Go to `catkin_ws` and compile to generate executable and configuration files for the project
 
 ```sh
 cd ..
@@ -90,7 +91,7 @@ Add the following command in `.bashrc` (in HOME directory)
 source /home/riotu/catkin_ws/devel/setup.bash 
 ```
 
-replace riotu by your username
+replace `riotu` by your username
 
 ---
 
@@ -233,11 +234,11 @@ Read about [rosrun](#rosrun)
 
 ### Set up Message
 
-1. Create `msg` folder in the package_name (e.g. ros_service_assignment).
+1. Create `msg` folder in the package (e.g. ros_service_assignment).
 
 2. Create `IoTSensor.msg` file in `msg` folder.
 
-3. Add the request and response values in `IoTSensor.msg` file. Example:
+3. Add the message values in `IoTSensor.msg` file. Example:
 
 ```plain
 int32 id
@@ -424,7 +425,7 @@ Read about [rosrun](#rosrun)
 
 ### Set up Client/Server
 
-1. Create `srv` folder in the package_name (e.g. ros_service_assignment).
+1. Create `srv` folder in the package (e.g. ros_service_assignment).
 
 2. Create `RectangleAeraService.srv` file in `srv` folder.
 
@@ -1326,5 +1327,9 @@ Add the following line to make `gb` shortcut to open Gedit to edit `.bashrc`
 ```sh
 alias gb=“gedit /home/riotu/.bashrc” 
 ```
+
+---
+
+## Troubleshooting
 
 ---
