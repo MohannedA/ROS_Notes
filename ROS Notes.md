@@ -657,11 +657,10 @@ https://edu.gaitech.hk/turtlebot/network-config-doc.html
 
 ### Turtlesim
 
-- Refernces <br>
+Refernces <br>
 [01] http://wiki.ros.org/turtlesim <br>
 [02] http://wiki.ros.org/ROS/Tutorials/UnderstandingServicesParams
 
-- 
 
 #### Start Turtlesim
 
