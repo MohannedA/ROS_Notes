@@ -34,7 +34,7 @@
 
 ### Configure Workspace
 
-1. Add the following command into `.bashrc` file to activate the ROS default workspace
+Add the following command into `.bashrc` file to activate the ROS default workspace
 
 ```sh
 source /opt/ros/kinetic/setup.bash
@@ -55,6 +55,16 @@ mkdir -p ~/catkin_ws/src
 cd ~/catkin_ws/
 catkin_make
 ```
+
+### Make The New Workspace The Default One
+
+Add the following command in `.bashrc` (in HOME directory)
+
+```sh
+source /home/riotu/catkin_ws/devel/setup.bash 
+```
+
+replace `riotu` by your username
 
 ---
 
@@ -82,16 +92,6 @@ catkin_create_pkg cs460_package std_msgs rospy roscpp
 cd ..
 catkin_make
 ```
-
-### Make The New Package The Default One
-
-Add the following command in `.bashrc` (in HOME directory)
-
-```sh
-source /home/riotu/catkin_ws/devel/setup.bash 
-```
-
-replace `riotu` by your username
 
 ---
 
@@ -232,7 +232,14 @@ Read about [rosrun](#rosrun)
 - Syntax: package_name/message_type
 - Unsigned int only takes positive values.
 
-### Set up Message
+### Created Messages 
+
+#### `std_msgs` Message
+
+>Message of type string that contains only one field
+which is called data.
+
+### Set up New Message
 
 1. Create `msg` folder in the package (e.g. ros_service_assignment).
 
@@ -422,6 +429,8 @@ Read about [rosrun](#rosrun)
 ---
 
 ## Services
+
+>It is similar to webservices, it is just a request and a response and the connection is not open all the time.
 
 ### Set up Client/Server
 
@@ -648,9 +657,11 @@ https://edu.gaitech.hk/turtlebot/network-config-doc.html
 
 ### Turtlesim
 
-Refernces </br>
-[01] http://wiki.ros.org/turtlesim </br>
+- Refernces <br>
+[01] http://wiki.ros.org/turtlesim <br>
 [02] http://wiki.ros.org/ROS/Tutorials/UnderstandingServicesParams
+
+- 
 
 #### Start Turtlesim
 
@@ -1326,6 +1337,12 @@ Add the following line to make `gb` shortcut to open Gedit to edit `.bashrc`
 alias gb=“gedit /home/riotu/.bashrc” 
 ```
 
+### Make File Executable Using Terminal
+
+```sh
+chmod +x filename.py
+```
+
 ---
 
 ## Troubleshooting
@@ -1361,6 +1378,20 @@ velocity_publisher = rospy.Publisher(cmd_vel_topic, Twist, queue_size=10)
 time.sleep(2)
 move(22.0, 90.0, True)
 ...
+```
+
+### Executeable File is NOT Working 
+
+1. Go to the workspace source directory
+
+```sh
+cd catkin_ws
+```
+
+2. Run
+
+```sh
+catkin_make
 ```
 
 ---
