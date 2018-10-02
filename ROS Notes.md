@@ -688,7 +688,7 @@ Learn more about [rosservice](http://wiki.ros.org/ROS/Tutorials/UnderstandingSer
 ```python
 #!/usr/bin/env python
 
-# Q1: What is the limit of rospy.Rate?
+# Q1: What is the limit of rospy.Rate? 
 # Q2: Is it always good to use large numbers for rospy.Rate? 
 
 from turtlesim.msg import Pose
@@ -696,12 +696,9 @@ import rospy
 from geometry_msgs.msg import Twist
 import math
 import time
-from std_srvs.srv import Empty
+#from std_srvs.srv import Empty
 
-x=0
-y=0
-z=0
-yaw=0
+currentTurtlesimPose = Pose()
 
 x_min = 0.0
 y_min = 0.0
@@ -712,20 +709,17 @@ y_max = 11.0
 def poseCallback(pose_message):
     # To change the value of the parameters and get the global variables, 
     # "global" keyword is used.  
-    global x
-    global y, z, yaw
+    global currentTurtlesimPose
     # Get the information. 
-    x= pose_message.x
-    y= pose_message.y
-    yaw = pose_message.theta
+    currentTurtlesimPose = pose_message
 
 def move(speed, distance, is_forward):
     #declare a Twist message to send velocity commands
     velocity_message = Twist()
 
     #get current location from the global variable before entering the loop 
-    x0=x
-    y0=y
+    #x0=x
+    #y0=y
     #z0=z;
     #yaw0=yaw;
 
@@ -743,22 +737,23 @@ def move(speed, distance, is_forward):
         velocity_message.linear.x = -abs(speed)
 
     distance_moved = 0.0
-    loop_rate = rospy.Rate(10) # we publish the velocity at 10 Hz (10 times a second)    
+    t0 = rospy.Time.now().to_sec()
+    loop_rate = rospy.Rate(100) # we publish the velocity at 10 Hz (10 times a second)    
 
         #task 2. create a publisher for the velocity message on the appropriate topic.  
-    velocity_publisher = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
+    #velocity_publisher = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
 
     while True :
             #task 3. publish the velocity message 
             velocity_publisher.publish(velocity_message)
-
-            loop_rate.sleep()
             
             #rospy.Duration(1.0)
 
 
             #measure the distance moved
-            distance_moved = distance_moved+abs(0.5 * math.sqrt(((x-x0) ** 2) + ((y-y0) ** 2)))
+            t1 = rospy.Time.now().to_sec()
+            distance_moved = (t1-t0)*speed
+            loop_rate.sleep()
             print  distance_moved               
             if not (distance_moved < distance):
                 rospy.loginfo("reached")
@@ -773,8 +768,8 @@ def rotate(angular_speed, relative_angle, is_clockwise):
     velocity_message = Twist()
 
     #get current location from the global variable before entering the loop 
-    x0=x
-    y0=y
+    #x0=x
+    #y0=y
     #z0=z;
     #yaw0=yaw
     
@@ -790,33 +785,34 @@ def rotate(angular_speed, relative_angle, is_clockwise):
     if is_clockwise: 
         velocity_message.angular.z = -abs(angular_speed)
     else: 
-        velocity_message.linear.x = abs(angular_speed)
+        velocity_message.angular.z = abs(angular_speed)
 
 
     angle_moved = 0.0
-    t0 = time.time()
-    loop_rate = rospy.Rate(10) # we publish the velocity at 10 Hz (10 times a second), loop_rate.sleep() will wait for 1/10 seconds   
+    t0 = rospy.Time.now().to_sec()
+    loop_rate = rospy.Rate(100) # we publish the velocity at 10 Hz (10 times a second), loop_rate.sleep() will wait for 1/10 seconds   
 
 
         #task 2. create a publisher for the velocity message on the appropriate topic.  
-    velocity_publisher = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
+    #velocity_publisher = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
 
     while True :
-            #task 3. publish the velocity message 
-            velocity_publisher.publish(velocity_message)
+        #task 3. publish the velocity message 
+        velocity_publisher.publish(velocity_message)
 
-            loop_rate.sleep()
-            
-            #rospy.Duration(1.0)
+        #loop_rate.sleep()
+        
+        #rospy.Duration(1.0)
 
 
-            #measure the distance moved
-            t1 = time.time()
-            angle_moved = angular_speed * (t1-t0)
-            print  angle_moved               
-            if not (angle_moved < relative_angle):
-                rospy.loginfo("reached")
-                break
+        #measure the distance moved
+        t1 = rospy.Time.now().to_sec()
+        angle_moved = angular_speed * (t1-t0)
+        loop_rate.sleep()
+        print  angle_moved               
+        if not (angle_moved < relative_angle):
+            rospy.loginfo("reached")
+            break
     
     #task 4. publish a velocity message zero to make the robot stop after the distance is reached
     velocity_message.angular.z = 0
@@ -829,29 +825,29 @@ def get_distance(x1, y1, x2, y2):
     return math.sqrt(pow((x1-x2),2)+pow((y1-y2),2))
 
 def set_desired_orientation (desired_angle_radians):
-    relative_angle_radians = desired_angle_radians - yaw
+    relative_angle_radians = desired_angle_radians - currentTurtlesimPose.theta
     if relative_angle_radians < 0:
-        clockwise = True
+        clockwise = 1
     else:
-        clockwise = False
-	rotate(degrees_to_radians(10), abs(relative_angle_radians), clockwise)
+        clockwise = 0
+	rotate(degrees_to_radians(20), abs(relative_angle_radians), clockwise)
 
 def move_to_goal(goal_pose, distance_tolerance):
     #declare a Twist message to send velocity commands
     velocity_message = Twist()
 
-    loop_rate = rospy.Rate(10) # we publish the velocity at 10 Hz (10 times a second) 
+    loop_rate = rospy.Rate(100) # we publish the velocity at 10 Hz (10 times a second) 
     E = 0.0
 
     #task 2. create a publisher for the velocity message on the appropriate topic.  
-    velocity_publisher = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
+    #velocity_publisher = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
 
     while True:
 
         kp = 1.0
         ki = 0.02
 
-        e = get_distance(x, y, goal_pose.x, goal_pose.y)
+        e = get_distance(currentTurtlesimPose.x, currentTurtlesimPose.y, goal_pose.x, goal_pose.y)
         E = E+e
 
         velocity_message.linear.x = (kp*e)
@@ -860,14 +856,14 @@ def move_to_goal(goal_pose, distance_tolerance):
 		#angular velocity in the z-axis
         velocity_message.angular.x = 0
         velocity_message.angular.y = 0
-        velocity_message.angular.z =4*(math.atan2(goal_pose.y-y, goal_pose.x-x)-yaw)
+        velocity_message.angular.z =4*(math.atan2(goal_pose.y-currentTurtlesimPose.y, goal_pose.x-currentTurtlesimPose.x)-currentTurtlesimPose.theta)
 
         velocity_publisher.publish(velocity_message)
 
         #rospy.spin()
         loop_rate.sleep()
 
-        if not (get_distance(x, y, goal_pose.x, goal_pose.y)>distance_tolerance):
+        if not (get_distance(currentTurtlesimPose.x,currentTurtlesimPose.y, goal_pose.x, goal_pose.y)>distance_tolerance):
                 rospy.loginfo("reached")
                 break
     #task 4. publish a velocity message zero to make the robot stop after the distance is reached
@@ -888,14 +884,14 @@ def grid_clean():
     
     move(2.0, 9.0, True)
     loop_rate.sleep()
-    rotate(degrees_to_radians(10), degrees_to_radians(90), False)
+    rotate(degrees_to_radians(20), degrees_to_radians(90), False)
     loop_rate.sleep()
     move(2.0, 9.0, True)
     
-    rotate(degrees_to_radians(10), degrees_to_radians(90), False)
+    rotate(degrees_to_radians(20), degrees_to_radians(90), False)
     loop_rate.sleep()
     move(2.0, 1.0, True)
-    rotate(degrees_to_radians(10), degrees_to_radians(90), False)
+    rotate(degrees_to_radians(20), degrees_to_radians(90), False)
     loop_rate.sleep()
     move(2.0, 9.0, True)
 
@@ -907,13 +903,13 @@ def grid_clean():
     move(2.0, 9.0, True)
 
 
-    distance = get_distance(x, y, x_max, y_max)
+    distance = get_distance(currentTurtlesimPose.x,currentTurtlesimPose.y, x_max, y_max)
 
 def spiral_clean():
     #declare a Twist message to send velocity commands
     velocity_message = Twist()
 
-    velocity_publisher = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
+    #velocity_publisher = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
 
 
     count = 0
@@ -938,7 +934,7 @@ def spiral_clean():
 
         loop_rate.sleep()
 
-        if not (x<10.5) and (y<10.5):
+        if not (currentTurtlesimPose.x<10.5) and (currentTurtlesimPose.y<10.5):
             velocity_message.linear.x = 0
             velocity_publisher.publish(velocity_message)    
 
@@ -947,6 +943,8 @@ def spiral_clean():
 if __name__=='__main__':
     try:
         rospy.init_node('cleaner', anonymous=True)
+
+        velocity_publisher = rospy.Publisher('/turtle1/cmd_vel', Twist, queue_size=10)
 
         position_topic = "/turtle1/pose"
         pose_subscriber = rospy.Subscriber(position_topic, Pose, poseCallback)
@@ -975,7 +973,7 @@ if __name__=='__main__':
             spiral_clean()
         rospy.spin()
     except rospy.ROSInterruptException:
-        rospy.loginfo("node terminated.") 
+        rospy.loginfo("node terminated.")
 ```
 
 </details>
@@ -1320,7 +1318,7 @@ roslaunch ros_essentials_cpp cleaner_py.launch
 Read about [roslaunch](#roslaunch)
 
 
-### Create shortcuts and aliases in .bashrc (in HOME directory)
+### Create shortcuts and aliases in `.bashrc` (in `HOME` directory)
 
 Add the following line to make `gb` shortcut to open Gedit to edit `.bashrc`
 
