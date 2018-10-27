@@ -1496,6 +1496,12 @@ alias gb=“gedit /home/riotu/.bashrc”
 chmod +x filename.py
 ```
 
+### Add Authorization Access
+
+```sh
+sudo chmod 777 ttyACM0
+```
+
 ---
 
 ## Troubleshooting
