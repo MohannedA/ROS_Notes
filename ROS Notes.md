@@ -13,6 +13,7 @@
 - [Messages](#messages)
 - [Services](#services)
 - [Network Configuration](#network-configuration)
+- [Perception](#perception)
 - [Robots](#robots)
   * [Turtlesim](#turtlesim)
   * [Turtlebot](#turtlebot)
@@ -653,6 +654,28 @@ https://edu.gaitech.hk/turtlebot/network-config-doc.html
 
 ---
 
+
+## Perception
+
+### Images
+
+#### OpenCV
+
+> Open Source Computer Vision Library.
+
+- For 2D Image Processing.
+
+- To use OpenCV effectively `import numpy`, it is used to trait images as arrays.
+
+- Read about [Contours](https://docs.opencv.org/3.3.1/d4/d73/tutorial_py_contours_begin.html)
+
+- Read about [Thresholding](https://docs.opencv.org/3.4.0/d7/d4d/tutorial_py_thresholding.html)
+
+### Laser
+
+- Read about [LaserScanner](http://wiki.ros.org/laser_pipeline/Tutorials/IntroductionToWorkingWithLaserScannerData)
+
+
 ## Robots
 
 ### Turtlesim
@@ -717,7 +740,7 @@ y_max = 11.0
 
 
 def poseCallback(pose_message):
-    # To change the value of the parameters and get the global variables, 
+    # To change the value of the parameters and get the global variables,
     # "global" keyword is used.  
     global currentTurtlesimPose
     # Get the information. 
@@ -727,7 +750,7 @@ def move(speed, distance, is_forward):
     #declare a Twist message to send velocity commands
     velocity_message = Twist()
 
-    #get current location from the global variable before entering the loop 
+    #get current location from the global variable before entering the loop
     #x0=x
     #y0=y
     #z0=z;
@@ -1007,10 +1030,29 @@ Read about [roslaunch](#roslaunch)
 
 ### Turtlebot
 
-#### Start Turtlebot
+#### Install Turtlebot Packages
+
+
+```sh
+sudo apt-get install ros-kinetic-turtlebot-*
+```
+
+#### Start Turtlebot(Simulator)
 
 ```sh
 roslaunch turtlebot_stage turtlebot_in_stage.launch
+```
+
+#### Start Turtlebot(Physical)
+
+```sh
+roslaunch turtlebot_bringup minimal.launch
+```
+
+#### Start Camera Node
+
+```sh
+roslaunch turtlebot_bringup 3dsensor.launch
 ```
 
 #### Move Turtlebot By Using Keyboard
@@ -1173,7 +1215,106 @@ if __name__ == '__main__':
 
 </details>
 
+<details>
+<summary>scan_subscriber_move.py</summary>
+
+```python
+#!/usr/bin/env python
+import rospy
+from sensor_msgs.msg import LaserScan
+from geometry_msgs.msg import Twist
+import math
+import time 
+
+
+mv = 0
+
+cmd_vel_topic='/cmd_vel_mux/input/teleop'
+velocity_publisher = rospy.Publisher(cmd_vel_topic, Twist, queue_size=10)
+
+def scan_callback(scan_data):
+    global mv
+    #Find minimum range
+    min_value, min_index = min_range_index(scan_data.ranges)
+    mv = min_value
+    """
+    print "\nthe minimum range value is: ", min_value
+    print "the minimum range index is: ", min_index
+
+    max_value, max_index = max_range_index(scan_data.ranges)
+    print "\nthe maximum range value is: ", max_value
+    print "the maximum range index is: ", max_index
+
+    average_value = average_range (scan_data.ranges)
+    print "\nthe average range value is: ", average_value
+
+    average2 = average_between_indices(scan_data.ranges, 2, 7)
+    print "\nthe average between 2 indices is: ", average2
+
+    print "the field of view: ", field_of_view(scan_data)
+    """
+
+def field_of_view(scan_data):
+    return (scan_data.angle_max-scan_data.angle_min)*180.0/3.14
+
+#find the max range and its index
+def min_range_index(ranges):
+    ranges = [x for x in ranges if not math.isnan(x)]
+    return (min(ranges), ranges.index(min(ranges)) )
+
+#find the max range 
+def max_range_index(ranges):
+    ranges = [x for x in ranges if not math.isnan(x)]
+    return (max(ranges), ranges.index(max(ranges)) )
+
+#find the average range
+def average_range(ranges):
+    ranges = [x for x in ranges if not math.isnan(x)]
+    return ( sum(ranges) / float(len(ranges)) )
+
+def average_between_indices(ranges, i, j):
+    ranges = [x for x in ranges if not math.isnan(x)]
+    slice_of_array = ranges[i: j+1]
+    return ( sum(slice_of_array) / float(len(slice_of_array)) )
+
+
+def move(): 
+    loop_rate = rospy.Rate(10) # we publish the velocity at 10 Hz (10 times a second)      
+    vel_msg = Twist()
+    while True:
+        vel_msg.linear.x = 0.3
+        vel_msg.angular.z = 0
+        rospy.loginfo("---------------> " + str(mv))
+        while mv > 0.5:
+            print("lin")
+            velocity_publisher.publish(vel_msg)
+            #loop_rate.sleep()
+        vel_msg.linear.x = 0
+        vel_msg.angular.z = 1.5
+        while mv < 1.0:
+            print("rot")
+            velocity_publisher.publish(vel_msg)
+            #loop_rate.sleep()
+
+
+if __name__ == '__main__':  
+    
+    #init new a node and give it a name
+    rospy.init_node('scan_node', anonymous=True)
+    #subscribe to the topic /scan. 
+    rospy.Subscriber("scan", LaserScan, scan_callback)
+
+    time.sleep(2)
+    move()
+
+    # spin() simply keeps python from exiting until this node is stopped
+    rospy.spin()
+```
+</details>
+
 ---
+
+
 
 ## Commands
 
@@ -1294,11 +1435,23 @@ Example:
 roscd roscpp
 ```
 
-Go to the default workspace 
+Go to the default workspace
 
 ```sh
 roscd
 ```
+
+### rosservice
+
+> rosservice contains the rosservice command-line tool for listing and querying ROS Services. It also contains a Python library for retrieving information about Services and dynamically invoking them. The Python library is experimental and is for internal-use only.
+
+List all services in the specified namespace
+
+```sh
+rosservice list /rosout
+```
+
+For more information, click [HERE](http://wiki.ros.org/rosservice)
 
 ---
 
