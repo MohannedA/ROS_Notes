@@ -26,6 +26,7 @@
   * [rosrun](#rosrun)
   * [roslaunch](#roslaunch)
   * [roscd](#roscd)
+  * [rosservice](#rosservice)
 - [Others](#others)
 - [Troubleshooting](#troubleshooting)
 
