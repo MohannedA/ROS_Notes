@@ -14,6 +14,7 @@
 - [Services](#services)
 - [Network Configuration](#network-configuration)
 - [Perception](#perception)
+- [Navigation and Maps](#navigation-and-maps)
 - [Robots](#robots)
   * [Turtlesim](#turtlesim)
   * [Turtlebot](#turtlebot)
@@ -676,6 +677,47 @@ https://edu.gaitech.hk/turtlebot/network-config-doc.html
 
 - Read about [LaserScanner](http://wiki.ros.org/laser_pipeline/Tutorials/IntroductionToWorkingWithLaserScannerData)
 
+## Navigation and Maps
+
+### Create Map
+
+1. Launch world simulator map
+
+```sh
+roslaunch turtlebot3_gazebo turtlebot3_world.launch 
+```
+
+2. Launch Gmapping
+
+```sh
+roslaunch turtlebot3_slam turtlebot3_slam.launch slam_methods:=gmapping
+```
+
+3. Launch keyboard to control the robot
+
+```sh
+roslaunch turtlebot3_teleop turtlebot3_teleop_key.launch
+```
+
+4. Save The Created Map
+
+```sh
+rosrun map_server map_saver -f /tmp/my_map
+```
+
+### Navigate In Map
+
+1. Launch empty world simulator 
+
+```sh
+roslaunch turtlebot3_gazebo turtlebot3_empty_world.launch
+```
+
+2. Open map to navigate
+
+```sh
+roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:={absolute_path}.yaml
+```
 
 ## Robots
 
